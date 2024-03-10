@@ -1,0 +1,18 @@
+[Desktop Entry]
+Comment[en_GB]=
+Comment=
+Exec=/home/deck/scripts/StickyDP/install.sh from_desktop
+GenericName[en_GB]=SDP - replacement shortcut
+GenericName=SDP - replacement shortcut
+Icon=steamdeck-gaming-return
+MimeType=
+Name[en_GB]=Return to Gaming Mode
+Name=Return to Gaming Mode
+Name[en_US]=Return to Gaming Mode
+Path=
+StartupNotify=false
+Terminal=false
+TerminalOptions=
+Type=Application
+X-KDE-SubstituteUID=false
+X-KDE-Username=
