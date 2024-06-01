@@ -164,12 +164,12 @@ Run 'install.sh' to return system to default and remove all traces of StickyDP.\
 (please let me know if I missed anything)"; then
 
         # Copy and swap files
-        if ! -d "$target/.config/autostart"; then
+        if [[ ! -d "$target/.config/autostart" ]]; then
             mkdir -p "$target/.config/autostart"
         fi
         filer cp "$utils/$startup_file" "$target/.config/autostart/"
         filer mv "$target/Desktop/$return_gaming_file" "$utils/Return to Gaming Mode(OG).desktop"
-        filer cp "$utils/Return to Gaming Mode(SDP).desktop" "$target/Desktop/$return_gaming_file"
+        awk -v path="$me from_desktop" '{sub(/Exec=/, "& " path); print}' "$utils/Return to Gaming Mode(SDP).desktop" > temp && mv temp "$target/Desktop/$return_gaming_file"
 
         log "all items relocated successfully"
         handle_config_file writ "Active=true" # Update config file to reflect activated status
