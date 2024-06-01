@@ -11,6 +11,7 @@ utils="$here/utils" # Util directory
 config_file="StickyDP" # Configuration file
 config="$target/.config/$config_file"
 startup_file="sticky-desktop-plugin.sh.desktop"
+return_gaming_file="Return.desktop"
 logstr="" # Initialises the log buffer
 
 ## Support Functions ##
@@ -162,14 +163,16 @@ This will:\n\
 Run 'install.sh' to return system to default and remove all traces of StickyDP.\n\
 (please let me know if I missed anything)"; then
 
-        handle_config_file writ "Active=true" # Update config file to reflect activated status
         # Copy and swap files
+        if ! -d "$target/.config/autostart"; then
+            mkdir -p "$target/.config/autostart"
+        fi
         filer cp "$utils/$startup_file" "$target/.config/autostart/"
-        filer mv "$target/Desktop/Return to Gaming Mode.desktop" "$utils/Return to Gaming Mode(OG).desktop"
-        filer cp "$utils/Return to Gaming Mode(SDP).desktop" "$target/Desktop/Return to Gaming Mode.desktop"
+        filer mv "$target/Desktop/$return_gaming_file" "$utils/Return to Gaming Mode(OG).desktop"
+        filer cp "$utils/Return to Gaming Mode(SDP).desktop" "$target/Desktop/$return_gaming_file"
 
         log "all items relocated successfully"
-
+        handle_config_file writ "Active=true" # Update config file to reflect activated status
 
         $me from_startup
 
@@ -190,8 +193,8 @@ uninstaller(){
 
         # Remove and restore files to their original state with error checking
         filer rm "$target/.config/autostart/$startup_file"
-        filer rm "$target/Desktop/Return to Gaming Mode.desktop"
-        filer mv "$utils/Return to Gaming Mode(OG).desktop" "$target/Desktop/Return to Gaming Mode.desktop"
+        filer rm "$target/Desktop/$return_gaming_file"
+        filer mv "$utils/Return to Gaming Mode(OG).desktop" "$target/Desktop/$return_gaming_file"
         filer rm "$target/.config/$config_file"
 
         log "all things back in their rightful place"
