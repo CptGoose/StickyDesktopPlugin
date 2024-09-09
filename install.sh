@@ -64,6 +64,7 @@ handle_config_file() {
                     echo "Active=true" >> "$config"
                 fi
                 echo "QuickSwap=false" >> "$config"
+                echo "Returning=pending" >> "$config"
                 echo "FirstTimeMsg=unseen" >> "$config"
                 echo "FirstReturnMsg=unseen" >> "$config"
                 log "created default config file at $config"
@@ -161,7 +162,7 @@ This will:\n\
 + Swap the 'Return to Gaming Mode' shortcut with one that works with this plugin.\n\n\
 - Can't automatically restart to Desktop Mode from Gaming Mode, sorryy.\n\n\
 Run 'install.sh' to return system to default and remove all traces of StickyDP.\n\
-(please let me know if I missed anything)"; then
+(please let me know if I missed anything)" --yes-label "Yes (will restart system)"; then
 
         # Copy and swap files
         if [[ ! -d "$target/.config/autostart" ]]; then
@@ -174,11 +175,13 @@ Run 'install.sh' to return system to default and remove all traces of StickyDP.\
         log "all items relocated successfully"
         handle_config_file writ "Active=true" # Update config file to reflect activated status
 
+        echo "$logstr" >> "$utils/Log.txt" # Append log buffer to log file
         $me from_startup
 
     else
         filer rm "$target/.config/$config_file"
         send "push" "Nothing changed."
+        echo "$logstr" >> "$utils/Log.txt" # Append log buffer to log file
         exit 0
     fi
 }
@@ -192,12 +195,32 @@ uninstaller(){
     "Uninstall Sticky Desktop plugin?"; then
 
         # Remove and restore files to their original state with error checking
-        filer rm "$target/.config/autostart/$startup_file"
-        filer rm "$target/Desktop/$return_gaming_file"
-        filer mv "$utils/Return to Gaming Mode(OG).desktop" "$target/Desktop/$return_gaming_file"
-        filer rm "$target/.config/$config_file"
+        if [[ -f "$target/.config/autostart/$startup_file" ]]; then
+            filer rm "$target/.config/autostart/$startup_file"
+        else
+            log "File $target/.config/autostart/$startup_file not found, skipping deletion"
+        fi
+
+        if [[ -f "$target/Desktop/$return_gaming_file" ]]; then
+            filer rm "$target/Desktop/$return_gaming_file"
+        else
+            log "File $target/Desktop/$return_gaming_file not found, skipping deletion"
+        fi
+
+        if [[ -f "$utils/Return to Gaming Mode(OG).desktop" ]]; then
+            filer mv "$utils/Return to Gaming Mode(OG).desktop" "$target/Desktop/$return_gaming_file"
+        else
+            log "File $utils/Return to Gaming Mode(OG).desktop not found, skipping restore"
+        fi
+
+        if [[ -f "$target/.config/$config_file" ]]; then
+            filer rm "$target/.config/$config_file"
+        else
+            log "File $target/.config/$config_file not found, skipping deletion"
+        fi
 
         log "all things back in their rightful place"
+        echo "$logstr" >> "$utils/Log.txt" # Append log buffer to log file
 
         play_sound "/usr/share/sounds/Oxygen-K3B-Finish-Success.ogg" &
         send "msgbox" \
@@ -214,6 +237,7 @@ Your engagement is always appreciated!"
 
     else
         send "push" "Nothing changed."
+        echo "$logstr" >> "$utils/Log.txt" # Append log buffer to log file
         exit 0
     fi
 }
@@ -221,11 +245,13 @@ Your engagement is always appreciated!"
 # Set Steam Deck to boot in Desktop Mode on the next restart.
 desktop-mode() {
     send "push" "Startup Mode: Desktop"
-    steamos-session-select plasma-x11-persistent
+    if [[ $Returning != "false" ]]; then
+        handle_config_file writ "Returning=false"
+        steamos-session-select plasma-x11-persistent
+    fi
 
     log "$FirstTimeMsg"
     if [[ $FirstTimeMsg == "unseen" ]]; then
-        send "push" "Restart for +10 satisfaction."
         handle_config_file writ "FirstTimeMsg=ready"
 
     elif [[ $FirstTimeMsg == "ready" ]]; then
@@ -247,6 +273,7 @@ have dedicated this time to learning bash* scripting.\n\n\
 
         handle_config_file writ "FirstTimeMsg=seen"
     fi
+    echo "$logstr" >> "$utils/Log.txt" # Append log buffer to log file
 }
 
 # Switch to Gaming Mode
@@ -255,6 +282,7 @@ gaming-mode() {
     if [[ "$QuickSwap" == "true" ]] ; then
         log "QuickSwap activated"
         send "push" "Switching to Gaming Mode"
+        handle_config_file writ "Returning=true"
         steamos-session-select gamescope
     else
         play_sound "/usr/share/sounds/Oxygen-Sys-App-Positive.ogg" &
@@ -273,8 +301,9 @@ gaming-mode() {
             if [[ "$FirstReturnMsg" == "unseen" ]]; then
                 send "msgbox" \
 "This is as far as I go, I have no way to pull you back here \
-on a restart. Worry not, I'll keep doing my thing once you \
-return to Desktop Mode.\n\n\
+on a restart. Don't worry, I'll keep doing my thing once you \
+return to Desktop Mode.\n
+(note: you will notice a double restart, due to a system update this is unfortunately necessary.)\n\n\
 If you ever want to disable me just run 'install.sh'.\n\
 If you chose (don't ask again) you'll need to reinstall to reset it."
 
@@ -285,6 +314,7 @@ If you chose (don't ask again) you'll need to reinstall to reset it."
         # Checks user choice
         if [[ $user_input == 0 ]]; then # "Yes" selected
             send "push" "Switching to Gaming Mode"
+            handle_config_file writ "Returning=true"
             steamos-session-select gamescope
 
         elif [[ $user_input == 1 ]]; then # "Yes, don't ask again" selected
@@ -292,12 +322,14 @@ If you chose (don't ask again) you'll need to reinstall to reset it."
             handle_config_file writ "QuickSwap=true" # Saves QuickSwap mode to config
             send "push" "Switching to Gaming Mode"
             send "push" "It's been a real slice"
+            handle_config_file writ "Returning=true"
             steamos-session-select gamescope
 
         else
             send "push" "Staying in Desktop Mode"
         fi
     fi
+    echo "$logstr" >> "$utils/Log.txt" # Append log buffer to log file
 }
 
 
