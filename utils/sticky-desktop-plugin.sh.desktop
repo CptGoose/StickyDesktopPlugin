@@ -1,7 +1,7 @@
 [Desktop Entry]
 Comment[en_GB]=
 Comment=
-Exec=/home/deck/scripts/StickyDP/install.sh from_startup
+Exec=/home/deck/scripts/StickyDesktopPlugin/install.sh from_startup
 GenericName[en_GB]=
 GenericName=
 Icon=dialog-scripts
