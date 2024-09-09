@@ -221,7 +221,7 @@ Your engagement is always appreciated!"
 # Set Steam Deck to boot in Desktop Mode on the next restart.
 desktop-mode() {
     send "push" "Startup Mode: Desktop"
-    steamos-session-select plasma-persistent
+    steamos-session-select plasma-x11-persistent
 
     log "$FirstTimeMsg"
     if [[ $FirstTimeMsg == "unseen" ]]; then
