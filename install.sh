@@ -11,7 +11,7 @@ utils="$here/utils" # Util directory
 config_file="StickyDP" # Configuration file
 config="$target/.config/$config_file"
 startup_file="sticky-desktop-plugin.sh.desktop"
-return_gaming_file="Return.desktop"
+return_gaming_file="Return to Gaming Mode.desktop"
 logstr="" # Initialises the log buffer
 
 ## Support Functions ##
